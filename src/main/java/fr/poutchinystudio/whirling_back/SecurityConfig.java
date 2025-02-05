@@ -27,7 +27,8 @@ public class SecurityConfig {
                                         "/ws/**",
                                         "/api/message/global",
                                         "/api/message/ingame",
-                                        "/api/identification"
+                                        "/api/identification",
+                                        "/api/identification/update-username"
                                 )
                                 .permitAll()
                                 .anyRequest()

@@ -20,4 +20,11 @@ public class IdentificationController {
         return service.identificationCheck(identification);
     }
 
+    @PostMapping("/update-username")
+    public Identification updateUserName(
+            @RequestBody IdentificationToUpdate identificationToUpdate
+    ) {
+        return service.updateUserName(identificationToUpdate);
+    }
+
 }
