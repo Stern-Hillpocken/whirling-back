@@ -12,7 +12,7 @@ public class MessageService {
     private final SimpMessagingTemplate messagingTemplate;
     private final IdentificationRepository identificationRepository;
 
-    void sendMessage(String channel, MessageInput messageInput) {
+    public void sendMessage(String channel, MessageInput messageInput) {
         if (identificationRepository.findByUserId(messageInput.getIdentification().getUserId()).isEmpty()) return;
         MessageOutput messageOutput = new MessageOutput(
                 messageInput.getIdentification().getUserName(),
