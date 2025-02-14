@@ -1,5 +1,6 @@
 package fr.poutchinystudio.whirling_back.identification;
 
+import fr.poutchinystudio.whirling_back.Utils;
 import fr.poutchinystudio.whirling_back.message.MessageInput;
 import fr.poutchinystudio.whirling_back.message.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -35,17 +36,9 @@ public class IdentificationService {
     private String userIdGeneration() {
         String userId;
         do {
-            userId = letterShuffler(3) + "-" + letterShuffler(4) + "-" + letterShuffler(3);
+            userId = Utils.letterShuffler(3) + "-" + Utils.letterShuffler(4) + "-" + Utils.letterShuffler(3);
         } while (repository.findByUserId(userId).isPresent());
         return userId;
-    }
-
-    private String letterShuffler(int times) {
-        String shuffled = "";
-        for (int i = 0; i < times; i++) {
-            shuffled += (char)(new Random().nextInt(26) + 'a');
-        }
-        return shuffled;
     }
 
     public Identification updateUserName(IdentificationToUpdate identificationToUpdate) {
