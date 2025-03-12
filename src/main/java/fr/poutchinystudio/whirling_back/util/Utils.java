@@ -1,4 +1,4 @@
-package fr.poutchinystudio.whirling_back;
+package fr.poutchinystudio.whirling_back.util;
 
 import java.util.Random;
 

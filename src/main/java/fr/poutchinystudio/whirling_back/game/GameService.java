@@ -1,6 +1,6 @@
 package fr.poutchinystudio.whirling_back.game;
 
-import fr.poutchinystudio.whirling_back.Utils;
+import fr.poutchinystudio.whirling_back.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
