@@ -1,5 +1,6 @@
 package fr.poutchinystudio.whirling_back.message;
 
+import fr.poutchinystudio.whirling_back.dto.OneValueObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,14 +16,14 @@ public class MessageController {
 
     @PostMapping("/global")
     public void sendGlobalMessage(
-            @RequestBody MessageInput message
+            @RequestBody OneValueObject message
     ) {
         messageService.sendMessage("global", message);
     }
 
     @PostMapping("/**")
     public void sendIngameMessage(
-            @RequestBody MessageInput message
+            @RequestBody OneValueObject message
     ) {
         messageService.sendMessage("ingame", message);
     }
