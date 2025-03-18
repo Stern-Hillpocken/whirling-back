@@ -13,7 +13,8 @@ public class GameService {
     private GameRepository repository;
 
     GameLogin creation(String password) {
-        password = password.substring(0, 9);
+        if (password.length() > 9) password = password.substring(0, 9);
+
         String gameId;
         do {
             gameId = Utils.letterShuffler(9);
