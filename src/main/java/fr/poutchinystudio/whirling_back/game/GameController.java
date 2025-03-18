@@ -1,6 +1,6 @@
 package fr.poutchinystudio.whirling_back.game;
 
-import fr.poutchinystudio.whirling_back.identification.Identification;
+import fr.poutchinystudio.whirling_back.dto.OneValueObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,8 +16,8 @@ public class GameController {
 
     @PostMapping("/creation")
     public GameLogin creation(
-            @RequestBody GameCreation gameCreation
+            @RequestBody OneValueObject ovo
             ) {
-        return this.service.creation(gameCreation.getPassword());
+        return this.service.creation(ovo.value);
     }
 }
