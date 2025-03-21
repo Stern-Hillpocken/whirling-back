@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,4 +19,8 @@ public class Game {
     @Id
     String id;
     String password;
+    String ownerId;
+    long date;
+    boolean isStarted;
+    ArrayList<String> playersId;
 }
