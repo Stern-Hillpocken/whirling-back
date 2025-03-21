@@ -2,10 +2,9 @@ package fr.poutchinystudio.whirling_back.game;
 
 import fr.poutchinystudio.whirling_back.dto.OneValueObject;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/game")
@@ -13,6 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
     private final GameService service;
+
+    @GetMapping("/all-games")
+    public List<GameInfo> allGames () {
+        return this.service.allNotStartedGames();
+    }
 
     @PostMapping("/creation")
     public GameLogin creation(
