@@ -18,13 +18,13 @@ public class MessageController {
     public void sendGlobalMessage(
             @RequestBody OneValueObject message
     ) {
-        messageService.sendMessage("global", message);
+        messageService.sendMessage("global", message, false);
     }
 
     @PostMapping("/**")
     public void sendIngameMessage(
             @RequestBody OneValueObject message
     ) {
-        messageService.sendMessage("ingame", message);
+        messageService.sendMessage("ingame", message, false);
     }
 }
