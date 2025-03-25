@@ -1,6 +1,6 @@
 package fr.poutchinystudio.whirling_back.game;
 
-import fr.poutchinystudio.whirling_back.user.UserRepository;
+import fr.poutchinystudio.whirling_back.user.UserService;
 import fr.poutchinystudio.whirling_back.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -10,13 +10,14 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class GameService {
 
     private final GameRepository repository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final SimpMessagingTemplate messagingTemplate;
 
     GameLogin creation(String password) {
@@ -34,7 +35,7 @@ public class GameService {
                 SecurityContextHolder.getContext().getAuthentication().getName(),
                 System.currentTimeMillis(),
                 false,
-                new ArrayList<>(Collections.singleton(SecurityContextHolder.getContext().getAuthentication().getName()))
+                new ArrayList<>(Collections.singleton(Utils.jwtUserId()))
         );
         repository.save(newGame);
 
@@ -42,7 +43,7 @@ public class GameService {
                 "/general/game-creation",
                 new GameInfo(
                         newGame.getDate(),
-                        userRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).get().getName(),
+                        userService.findById(Utils.jwtUserId()).getName(),
                         newGame.getId()
                 )
         );
@@ -57,12 +58,48 @@ public class GameService {
             if (!game.isStarted) {
                 games.add(new GameInfo(
                         game.getDate(),
-                        userRepository.findById(game.getOwnerId()).get().getName(),
+                        userService.findById(game.getOwnerId()).getName(),
                         game.getId()
                 ));
             }
         });
         return games;
+    }
+
+    public GameDTO myGame(String gameId, String gamePassword) {
+        Optional<Game> optionalGame = repository.findById(gameId);
+        if (optionalGame.isEmpty()) return null;
+        Game game = optionalGame.get();
+        if (!game.getPassword().equals(gamePassword)) return null;
+
+        if (!game.isStarted() && !game.getPlayersId().contains(Utils.jwtUserId())) {
+            game.addPlayerId(Utils.jwtUserId());
+            repository.save(game);
+            messagingTemplate.convertAndSend(
+                "/game/" + game.getId() + "?psw=" + game.getPassword(),
+                convertToDTO(game)
+            );
+        }
+
+        return convertToDTO(game);
+    }
+
+    private GameDTO convertToDTO(Game game) {
+        return new GameDTO(
+                game.getId(),
+                game.getPassword(),
+                userService.idToName(game.getOwnerId()),
+                game.getDate(),
+                playersName(game.getPlayersId())
+        );
+    }
+
+    private ArrayList<String> playersName(ArrayList<String> playersId) {
+        ArrayList<String> pNames = new ArrayList<>();
+        for (String pId : playersId) {
+            pNames.add(userService.idToName(pId));
+        }
+        return pNames;
     }
 
 }

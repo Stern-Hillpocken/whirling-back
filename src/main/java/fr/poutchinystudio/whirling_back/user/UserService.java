@@ -21,7 +21,12 @@ public class UserService {
     private final JwtUtils jwtUtils;
 
     private User getUser() throws NoSuchElementException {
-        Optional<User> optionalUser = repository.findById(SecurityContextHolder.getContext().getAuthentication().getName());
+        Optional<User> optionalUser = repository.findById(Utils.jwtUserId());
+        return optionalUser.get();
+    }
+
+    public User findById(String id) throws NoSuchElementException {
+        Optional<User> optionalUser = repository.findById(id);
         return optionalUser.get();
     }
 
@@ -74,5 +79,11 @@ public class UserService {
         messageService.sendMessage("global", new OneValueObject(oldName + " a changé de nom pour : " + newName), true);
 
         return user;
+    }
+
+    public String idToName(String id) {
+        Optional<User> optionalUser = repository.findById(id);
+        if (optionalUser.isEmpty()) return null;
+        return optionalUser.get().getName();
     }
 }
