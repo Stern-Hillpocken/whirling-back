@@ -3,9 +3,7 @@ package fr.poutchinystudio.whirling_back.user;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -52,6 +50,10 @@ public class User implements UserDetails {
 
     public String getGame() {
         return game;
+    }
+
+    public void setGame(String newGame) {
+        game = newGame;
     }
 
     public void setName(String newName) {

@@ -2,6 +2,7 @@ package fr.poutchinystudio.whirling_back.message;
 
 import fr.poutchinystudio.whirling_back.dto.OneValueObject;
 import fr.poutchinystudio.whirling_back.user.UserRepository;
+import fr.poutchinystudio.whirling_back.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ public class MessageService {
     private final UserRepository userRepository;
 
     public void sendMessage(String channel, OneValueObject message, boolean isGameSending) {
-        String naming = isGameSending ? "GAME" : userRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).get().getName();
+        String naming = isGameSending ? "GAME" : userRepository.findById(Utils.jwtUserId()).get().getName();
         MessageOutput messageOutput = new MessageOutput(
             naming,
             message.value,

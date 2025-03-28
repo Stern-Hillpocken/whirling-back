@@ -1,5 +1,7 @@
 package fr.poutchinystudio.whirling_back.util;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.util.Random;
 
 public abstract class Utils {
@@ -10,6 +12,10 @@ public abstract class Utils {
             shuffled += (char)(new Random().nextInt(26) + 'a');
         }
         return shuffled;
+    }
+
+    public static String jwtUserId() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
 }
