@@ -1,5 +1,6 @@
 package fr.poutchinystudio.whirling_back.game;
 
+import fr.poutchinystudio.whirling_back.user.User;
 import fr.poutchinystudio.whirling_back.user.UserService;
 import fr.poutchinystudio.whirling_back.util.Utils;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,10 @@ public class GameService {
         );
         repository.save(newGame);
 
+        User user = userService.findById(Utils.jwtUserId());
+        user.setGame(newGame.getId());
+        userService.save(user);
+
         messagingTemplate.convertAndSend(
                 "/general/game-creation",
                 new GameInfo(
@@ -55,7 +60,7 @@ public class GameService {
         List<Game> all = repository.findAll();
         List<GameInfo> games = new ArrayList<>();
         all.forEach(game -> {
-            if (!game.isStarted) {
+            if (!game.isStarted()) {
                 games.add(new GameInfo(
                         game.getDate(),
                         userService.findById(game.getOwnerId()).getName(),
@@ -75,10 +80,10 @@ public class GameService {
         if (!game.isStarted() && !game.getPlayersId().contains(Utils.jwtUserId())) {
             game.addPlayerId(Utils.jwtUserId());
             repository.save(game);
-            messagingTemplate.convertAndSend(
-                "/game/" + game.getId() + "?psw=" + game.getPassword(),
-                convertToDTO(game)
-            );
+            User user = userService.findById(Utils.jwtUserId());
+            user.setGame(game.getId());
+            userService.save(user);
+            pushWsNotification(game);
         }
 
         return convertToDTO(game);
@@ -94,12 +99,41 @@ public class GameService {
         );
     }
 
-    private ArrayList<String> playersName(ArrayList<String> playersId) {
-        ArrayList<String> pNames = new ArrayList<>();
+    private List<String> playersName(List<String> playersId) {
+        List<String> pNames = new ArrayList<>();
         for (String pId : playersId) {
             pNames.add(userService.idToName(pId));
         }
         return pNames;
     }
 
+    public void movePlayer(String playerIdInArray, String clockWay) {
+        int startPosition = Integer.parseInt(playerIdInArray);
+
+        User user = userService.findById(Utils.jwtUserId());
+        Optional<Game> oGame = repository.findById(user.getGame());
+        if (oGame.isEmpty()) return;
+
+        Game game = oGame.get();
+        if (!game.getOwnerId().equals(user.getId())) return;
+
+        int endPosition = 0;
+        if (startPosition == 0 && clockWay.equals("anticlockwise")) endPosition = game.getPlayersId().size()-1;
+        else if (startPosition == game.getPlayersId().size()-1 && clockWay.equals("clockwise")) endPosition = 0;
+        else if (clockWay.equals("anticlockwise")) endPosition = startPosition - 1;
+        else endPosition = startPosition + 1;
+
+        String tmpNameStart = game.getPlayersId().get(startPosition);
+        game.getPlayersId().set(startPosition, game.getPlayersId().get(endPosition));
+        game.getPlayersId().set(endPosition, tmpNameStart);
+        repository.save(game);
+        pushWsNotification(game);
+    }
+
+    private void pushWsNotification(Game game) {
+        messagingTemplate.convertAndSend(
+                "/game/" + game.getId() + "?psw=" + game.getPassword(),
+                convertToDTO(game)
+        );
+    }
 }

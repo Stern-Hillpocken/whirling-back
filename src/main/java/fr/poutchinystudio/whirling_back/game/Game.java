@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -20,12 +20,12 @@ import java.util.Optional;
 public class Game {
 
     @Id
-    String id;
-    String password;
-    String ownerId;
-    long date;
-    boolean isStarted;
-    ArrayList<String> playersId;
+    private String id;
+    private String password;
+    private String ownerId;
+    private long date;
+    private boolean isStarted;
+    private List<String> playersId;
 
     public void addPlayerId(String playerId) {
         playersId.add(playerId);
@@ -37,9 +37,9 @@ public class Game {
         return optionalUser.get().getName();
     }
 
-    private ArrayList<String> playersName() {
+    private List<String> playersName() {
         UserRepository userRepository = null;
-        ArrayList<String> pNames = null;
+        List<String> pNames = null;
         for (String pId : playersId) {
             pNames.add(userRepository.findById(pId).get().getName());
         }

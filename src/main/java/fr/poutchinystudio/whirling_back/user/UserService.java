@@ -86,4 +86,8 @@ public class UserService {
         if (optionalUser.isEmpty()) return null;
         return optionalUser.get().getName();
     }
+
+    public void save(User user) {
+        repository.save(user);
+    }
 }

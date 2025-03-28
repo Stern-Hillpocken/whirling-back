@@ -34,4 +34,18 @@ public class GameController {
     ) {
         return this.service.myGame(gameId, gamePassword);
     }
+
+    @PostMapping("/move-player/clockwise")
+    public void movePlayerClockwise (
+            @RequestBody OneValueObject ovo
+    ) {
+        this.service.movePlayer(ovo.value, "clockwise");
+    }
+
+    @PostMapping("/move-player/anticlockwise")
+    public void movePlayerAntiClockwise (
+            @RequestBody OneValueObject ovo
+    ) {
+        this.service.movePlayer(ovo.value, "anticlockwise");
+    }
 }

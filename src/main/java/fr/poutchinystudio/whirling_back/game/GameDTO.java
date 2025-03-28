@@ -4,15 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameDTO {
-    public String id;
-    public String password;
-    public String ownerName;
-    public long date;
-    public ArrayList<String> playersName;
+    private String id;
+    private String password;
+    private String ownerName;
+    private long date;
+    private List<String> playersName;
 }
