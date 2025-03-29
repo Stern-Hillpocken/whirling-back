@@ -1,19 +1,19 @@
 package fr.poutchinystudio.whirling_back.game;
 
+import fr.poutchinystudio.whirling_back.enums.Phases;
 import fr.poutchinystudio.whirling_back.user.User;
 import fr.poutchinystudio.whirling_back.user.UserRepository;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -26,9 +26,23 @@ public class Game {
     private long date;
     private boolean isStarted;
     private List<String> playersId;
+    private Phases currentPhase;
+    private List<Boolean> areReady;
 
-    public void addPlayerId(String playerId) {
+    public Game(String id, String password, String ownerId) {
+        this.id = id;
+        this.password = password;
+        this.ownerId = ownerId;
+        this.date = System.currentTimeMillis();
+        this.isStarted = false;
+        this.playersId = new ArrayList<>();
+        this.currentPhase = Phases.CHECK_FOR_WINNERS;
+        this.areReady = new ArrayList<>();
+    }
+
+    public void addPlayer(String playerId) {
         playersId.add(playerId);
+        areReady.add(false);
     }
 
     private String ownerName() {

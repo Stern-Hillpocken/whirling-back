@@ -1,5 +1,7 @@
 package fr.poutchinystudio.whirling_back.game;
 
+import fr.poutchinystudio.whirling_back.dto.OneValueObject;
+import fr.poutchinystudio.whirling_back.enums.Phases;
 import fr.poutchinystudio.whirling_back.user.User;
 import fr.poutchinystudio.whirling_back.user.UserService;
 import fr.poutchinystudio.whirling_back.util.Utils;
@@ -9,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,11 +34,9 @@ public class GameService {
         Game newGame = new Game(
                 gameId,
                 password,
-                SecurityContextHolder.getContext().getAuthentication().getName(),
-                System.currentTimeMillis(),
-                false,
-                new ArrayList<>(Collections.singleton(Utils.jwtUserId()))
+                SecurityContextHolder.getContext().getAuthentication().getName()
         );
+        newGame.addPlayer(Utils.jwtUserId());
         repository.save(newGame);
 
         User user = userService.findById(Utils.jwtUserId());
@@ -71,14 +70,14 @@ public class GameService {
         return games;
     }
 
-    public GameDTO myGame(String gameId, String gamePassword) {
+    public GameDTO getGame(String gameId, String gamePassword) {
         Optional<Game> optionalGame = repository.findById(gameId);
         if (optionalGame.isEmpty()) return null;
         Game game = optionalGame.get();
         if (!game.getPassword().equals(gamePassword)) return null;
 
         if (!game.isStarted() && !game.getPlayersId().contains(Utils.jwtUserId())) {
-            game.addPlayerId(Utils.jwtUserId());
+            game.addPlayer(Utils.jwtUserId());
             repository.save(game);
             User user = userService.findById(Utils.jwtUserId());
             user.setGame(game.getId());
@@ -86,7 +85,10 @@ public class GameService {
             pushWsNotification(game);
         }
 
-        return convertToDTO(game);
+        if (game.getPlayersId().contains(Utils.jwtUserId())) {
+            return convertToDTO(game);
+        }
+        return null;
     }
 
     private GameDTO convertToDTO(Game game) {
@@ -95,7 +97,10 @@ public class GameService {
                 game.getPassword(),
                 userService.idToName(game.getOwnerId()),
                 game.getDate(),
-                playersName(game.getPlayersId())
+                game.isStarted(),
+                playersName(game.getPlayersId()),
+                game.getCurrentPhase(),
+                game.getAreReady()
         );
     }
 
@@ -116,16 +121,28 @@ public class GameService {
 
         Game game = oGame.get();
         if (!game.getOwnerId().equals(user.getId())) return;
+        if (game.isStarted()) return;
 
         int endPosition = 0;
-        if (startPosition == 0 && clockWay.equals("anticlockwise")) endPosition = game.getPlayersId().size()-1;
-        else if (startPosition == game.getPlayersId().size()-1 && clockWay.equals("clockwise")) endPosition = 0;
-        else if (clockWay.equals("anticlockwise")) endPosition = startPosition - 1;
-        else endPosition = startPosition + 1;
-
-        String tmpNameStart = game.getPlayersId().get(startPosition);
-        game.getPlayersId().set(startPosition, game.getPlayersId().get(endPosition));
-        game.getPlayersId().set(endPosition, tmpNameStart);
+        if (startPosition == 0 && clockWay.equals("clockwise")) {
+            String name = game.getPlayersId().remove(1);
+            game.getPlayersId().add(game.getPlayersId().size()-1, name);
+        } else if (startPosition == 0 && clockWay.equals("anticlockwise")) {
+            String name = game.getPlayersId().remove(game.getPlayersId().size()-1);
+            game.getPlayersId().add(1, name);
+        } else if (startPosition == game.getPlayersId().size()-1 && clockWay.equals("clockwise")) {
+            String name = game.getPlayersId().remove(game.getPlayersId().size()-1);
+            game.getPlayersId().add(1, name);
+        } else if (startPosition == 1 && clockWay.equals("anticlockwise")) {
+            String name = game.getPlayersId().remove(1);
+            game.getPlayersId().add(game.getPlayersId().size(), name);
+        } else if (clockWay.equals("anticlockwise")) {
+            String name = game.getPlayersId().remove(startPosition);
+            game.getPlayersId().add(startPosition-1, name);
+        } else {
+            String name = game.getPlayersId().remove(startPosition);
+            game.getPlayersId().add(startPosition+1, name);
+        }
         repository.save(game);
         pushWsNotification(game);
     }
@@ -135,5 +152,31 @@ public class GameService {
                 "/game/" + game.getId() + "?psw=" + game.getPassword(),
                 convertToDTO(game)
         );
+    }
+
+    public void launch(OneValueObject ovo) {
+        User user = userService.findById(Utils.jwtUserId());
+        Optional<Game> oGame = repository.findById(user.getGame());
+        if (oGame.isEmpty()) return;
+
+        Game game = oGame.get();
+        if (!game.getOwnerId().equals(user.getId())) return;
+        if (game.isStarted()) return;
+
+        if (ovo.value.equals("randomize")) {
+            List<String> playerId = game.getPlayersId();
+            game.setPlayersId(new ArrayList<>());
+            game.setAreReady(new ArrayList<>());
+            while (!playerId.isEmpty()) {
+                int random = Utils.random(0, playerId.size()-1);
+                game.addPlayer(playerId.get(random));
+                playerId.remove(random);
+            }
+        }
+
+        game.setStarted(true);
+        game.setCurrentPhase(Phases.SETUP);
+        repository.save(game);
+        pushWsNotification(game);
     }
 }
