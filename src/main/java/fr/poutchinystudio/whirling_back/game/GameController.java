@@ -1,9 +1,7 @@
 package fr.poutchinystudio.whirling_back.game;
 
 import fr.poutchinystudio.whirling_back.dto.OneValueObject;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,25 +25,32 @@ public class GameController {
         return this.service.creation(ovo.value);
     }
 
-    @GetMapping("/game/{gameId}")
+    @GetMapping("/{gameId}")
     public GameDTO myGame(
             @PathVariable String gameId,
             @RequestParam("psw") String gamePassword
     ) {
-        return this.service.myGame(gameId, gamePassword);
+        return this.service.getGame(gameId, gamePassword);
     }
 
     @PostMapping("/move-player/clockwise")
-    public void movePlayerClockwise (
+    public void movePlayerClockwise(
             @RequestBody OneValueObject ovo
     ) {
         this.service.movePlayer(ovo.value, "clockwise");
     }
 
     @PostMapping("/move-player/anticlockwise")
-    public void movePlayerAntiClockwise (
+    public void movePlayerAntiClockwise(
             @RequestBody OneValueObject ovo
     ) {
         this.service.movePlayer(ovo.value, "anticlockwise");
+    }
+
+    @PostMapping("/launch")
+    public void launch(
+            @RequestBody OneValueObject ovo
+    ) {
+        this.service.launch(ovo);
     }
 }
