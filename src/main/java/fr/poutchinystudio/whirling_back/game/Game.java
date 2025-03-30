@@ -59,4 +59,20 @@ public class Game {
         }
         return pNames;
     }
+
+    public void setReadyFor(int userIndex) {
+        areReady.set(userIndex, true);
+    }
+
+    public void cleanAreReady() {
+        areReady.replaceAll(element -> false);
+    }
+
+    public void goToRecipePhase() {
+        currentPhase = Phases.PLAY_RECIPES;
+    }
+
+    public void goToProducePhase() {
+        currentPhase = Phases.PRODUCE_INGREDIENTS;
+    }
 }
