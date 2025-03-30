@@ -51,6 +51,25 @@ public class GameController {
     public void launch(
             @RequestBody OneValueObject ovo
     ) {
-        this.service.launch(ovo);
+        this.service.launch(ovo.value);
+    }
+
+    @PostMapping("/ready/setup")
+    public void readySetup(
+            @RequestBody OneValueObject ovo
+    ) {
+        this.service.readySetup(ovo.value);
+    }
+
+    @PostMapping("/ready/recipe")
+    public void readyRecipe(
+            @RequestBody OneValueObject ovo
+    ) {
+        this.service.readyRecipe(ovo.value);
+    }
+
+    @PostMapping("/ready/produce")
+    public void readyProduce() {
+        this.service.readyProduce();
     }
 }

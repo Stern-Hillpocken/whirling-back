@@ -1,6 +1,5 @@
 package fr.poutchinystudio.whirling_back.game;
 
-import fr.poutchinystudio.whirling_back.dto.OneValueObject;
 import fr.poutchinystudio.whirling_back.enums.Phases;
 import fr.poutchinystudio.whirling_back.user.User;
 import fr.poutchinystudio.whirling_back.user.UserService;
@@ -154,7 +153,7 @@ public class GameService {
         );
     }
 
-    public void launch(OneValueObject ovo) {
+    public void launch(String strRandomize) {
         User user = userService.findById(Utils.jwtUserId());
         Optional<Game> oGame = repository.findById(user.getGame());
         if (oGame.isEmpty()) return;
@@ -163,7 +162,7 @@ public class GameService {
         if (!game.getOwnerId().equals(user.getId())) return;
         if (game.isStarted()) return;
 
-        if (ovo.value.equals("randomize")) {
+        if (strRandomize.equals("randomize")) {
             List<String> playerId = game.getPlayersId();
             game.setPlayersId(new ArrayList<>());
             game.setAreReady(new ArrayList<>());
@@ -176,6 +175,60 @@ public class GameService {
 
         game.setStarted(true);
         game.setCurrentPhase(Phases.SETUP);
+        repository.save(game);
+        pushWsNotification(game);
+    }
+
+    public void readySetup(String characterIndex) {
+        User user = userService.findById(Utils.jwtUserId());
+        Optional<Game> oGame = repository.findById(user.getGame());
+        if (oGame.isEmpty()) return;
+        Game game = oGame.get();
+
+        int userIndex = game.getPlayersId().indexOf(user.getId());
+        game.setReadyFor(userIndex);
+
+        if (!game.getAreReady().contains(false)) {
+            game.cleanAreReady();
+            game.goToRecipePhase();
+        }
+
+        repository.save(game);
+        pushWsNotification(game);
+    }
+
+    public void readyRecipe(String recipeIndex) {
+        User user = userService.findById(Utils.jwtUserId());
+        Optional<Game> oGame = repository.findById(user.getGame());
+        if (oGame.isEmpty()) return;
+        Game game = oGame.get();
+
+        int userIndex = game.getPlayersId().indexOf(user.getId());
+        game.setReadyFor(userIndex);
+
+        if (!game.getAreReady().contains(false)) {
+            game.cleanAreReady();
+            game.goToProducePhase();
+        }
+
+        repository.save(game);
+        pushWsNotification(game);
+    }
+
+    public void readyProduce() {
+        User user = userService.findById(Utils.jwtUserId());
+        Optional<Game> oGame = repository.findById(user.getGame());
+        if (oGame.isEmpty()) return;
+        Game game = oGame.get();
+
+        int userIndex = game.getPlayersId().indexOf(user.getId());
+        game.setReadyFor(userIndex);
+
+        if (!game.getAreReady().contains(false)) {
+            game.cleanAreReady();
+            game.goToRecipePhase();
+        }
+
         repository.save(game);
         pushWsNotification(game);
     }
