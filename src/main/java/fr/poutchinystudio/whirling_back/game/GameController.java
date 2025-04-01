@@ -54,6 +54,11 @@ public class GameController {
         this.service.launch(ovo.value);
     }
 
+    @GetMapping("/my-index")
+    public OneValueObject myIndex() {
+        return this.service.myIndex();
+    }
+
     @PostMapping("/ready/setup")
     public void readySetup(
             @RequestBody OneValueObject ovo
