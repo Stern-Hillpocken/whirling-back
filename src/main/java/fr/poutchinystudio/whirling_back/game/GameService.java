@@ -1,5 +1,6 @@
 package fr.poutchinystudio.whirling_back.game;
 
+import fr.poutchinystudio.whirling_back.dto.OneValueObject;
 import fr.poutchinystudio.whirling_back.enums.Phases;
 import fr.poutchinystudio.whirling_back.user.User;
 import fr.poutchinystudio.whirling_back.user.UserService;
@@ -232,4 +233,15 @@ public class GameService {
         repository.save(game);
         pushWsNotification(game);
     }
+
+    public OneValueObject myIndex() {
+        User user = userService.findById(Utils.jwtUserId());
+        Optional<Game> oGame = repository.findById(user.getGame());
+        if (oGame.isEmpty()) return null;
+        Game game = oGame.get();
+
+        int userIndex = game.getPlayersId().indexOf(user.getId());
+        return new OneValueObject(Integer.toString(userIndex));
+    }
+
 }
