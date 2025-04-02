@@ -100,7 +100,8 @@ public class GameService {
                 game.isStarted(),
                 playersName(game.getPlayersId()),
                 game.getCurrentPhase(),
-                game.getAreReady()
+                game.getAreReady(),
+                game.getPlayingAreas()
         );
     }
 
@@ -167,6 +168,7 @@ public class GameService {
             List<String> playerId = game.getPlayersId();
             game.setPlayersId(new ArrayList<>());
             game.setAreReady(new ArrayList<>());
+            game.setPlayingAreas(new ArrayList<>());
             while (!playerId.isEmpty()) {
                 int random = Utils.random(0, playerId.size()-1);
                 game.addPlayer(playerId.get(random));
@@ -176,6 +178,11 @@ public class GameService {
 
         game.setStarted(true);
         game.setCurrentPhase(Phases.SETUP);
+
+        for (int i = 0; i < game.getPlayersId().size(); i++) {
+            game.getPlayingAreas().get(i).setupWitches();
+        }
+
         repository.save(game);
         pushWsNotification(game);
     }
@@ -185,10 +192,19 @@ public class GameService {
         Optional<Game> oGame = repository.findById(user.getGame());
         if (oGame.isEmpty()) return;
         Game game = oGame.get();
+        if (!game.getCurrentPhase().equals(Phases.SETUP)) return;
 
+        // Ready
         int userIndex = game.getPlayersId().indexOf(user.getId());
+        if (game.getAreReady().get(userIndex)) return;
         game.setReadyFor(userIndex);
 
+        // Set witch
+        int witchIndex = Integer.parseInt(characterIndex);
+        if (witchIndex != 0 && witchIndex != 1 && witchIndex != 2) witchIndex = 0;
+        game.getPlayingAreas().get(userIndex).setupWitch(witchIndex);
+
+        // Next phase
         if (!game.getAreReady().contains(false)) {
             game.cleanAreReady();
             game.goToRecipePhase();
@@ -203,10 +219,14 @@ public class GameService {
         Optional<Game> oGame = repository.findById(user.getGame());
         if (oGame.isEmpty()) return;
         Game game = oGame.get();
+        if (!game.getCurrentPhase().equals(Phases.PLAY_RECIPES)) return;
 
+        // Ready
         int userIndex = game.getPlayersId().indexOf(user.getId());
+        if (game.getAreReady().get(userIndex)) return;
         game.setReadyFor(userIndex);
 
+        // Next phase
         if (!game.getAreReady().contains(false)) {
             game.cleanAreReady();
             game.goToProducePhase();
@@ -221,10 +241,14 @@ public class GameService {
         Optional<Game> oGame = repository.findById(user.getGame());
         if (oGame.isEmpty()) return;
         Game game = oGame.get();
+        if (!game.getCurrentPhase().equals(Phases.PRODUCE_INGREDIENTS)) return;
 
+        // Ready
         int userIndex = game.getPlayersId().indexOf(user.getId());
+        if (game.getAreReady().get(userIndex)) return;
         game.setReadyFor(userIndex);
 
+        // Next phase
         if (!game.getAreReady().contains(false)) {
             game.cleanAreReady();
             game.goToRecipePhase();

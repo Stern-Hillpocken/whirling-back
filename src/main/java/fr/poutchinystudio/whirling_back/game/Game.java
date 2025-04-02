@@ -3,8 +3,8 @@ package fr.poutchinystudio.whirling_back.game;
 import fr.poutchinystudio.whirling_back.enums.Phases;
 import fr.poutchinystudio.whirling_back.user.User;
 import fr.poutchinystudio.whirling_back.user.UserRepository;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import fr.poutchinystudio.whirling_back.util.PlayingArea;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +28,8 @@ public class Game {
     private List<String> playersId;
     private Phases currentPhase;
     private List<Boolean> areReady;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<PlayingArea> playingAreas;
 
     public Game(String id, String password, String ownerId) {
         this.id = id;
@@ -38,11 +40,13 @@ public class Game {
         this.playersId = new ArrayList<>();
         this.currentPhase = Phases.CHECK_FOR_WINNERS;
         this.areReady = new ArrayList<>();
+        this.playingAreas = new ArrayList<>();
     }
 
     public void addPlayer(String playerId) {
         playersId.add(playerId);
         areReady.add(false);
+        playingAreas.add(new PlayingArea());
     }
 
     private String ownerName() {
