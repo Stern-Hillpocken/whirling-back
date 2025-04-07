@@ -45,4 +45,33 @@ public class PlayingArea {
     public void setupWitch(int witchIndex) {
         witch = new ArrayList<>(List.of(witch.get(witchIndex)));
     }
+
+    public void setupIngredients() {
+        workbench = new ArrayList<>(witch.get(0).getIngredientsLetters());
+    }
+
+    public void chooseRecipe(Recipe recipe) {
+        skills.add(recipe);
+        hand.remove(indexRecipeInHand(recipe));
+    }
+
+    public boolean isRecipeInHand(Recipe givenRecipe) {
+        return indexRecipeInHand(givenRecipe) == -1 ? false : true;
+    }
+
+    private int indexRecipeInHand(Recipe givenRecipe) {
+        for (int i = 0; i < hand.size(); i++) {
+            if (hand.get(i).getArcana().equals(givenRecipe.getArcana()) &&
+                    hand.get(i).getInput().equals(givenRecipe.getInput()) &&
+                    hand.get(i).getDirection().equals(givenRecipe.getDirection()) &&
+                    hand.get(i).getOutput().equals(givenRecipe.getOutput())
+            ) return i;
+            else if (hand.get(i).getArcana().equals(givenRecipe.getArcana()) &&
+                    hand.get(i).getInput().equals(givenRecipe.getOutput()) &&
+                    hand.get(i).getDirection().equals(givenRecipe.getDirection()) &&
+                    hand.get(i).getOutput().equals(givenRecipe.getInput())
+            ) return i;
+        }
+        return -1;
+    }
 }

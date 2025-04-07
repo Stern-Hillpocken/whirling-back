@@ -4,6 +4,7 @@ import fr.poutchinystudio.whirling_back.dto.OneValueObject;
 import fr.poutchinystudio.whirling_back.enums.Phases;
 import fr.poutchinystudio.whirling_back.user.User;
 import fr.poutchinystudio.whirling_back.user.UserService;
+import fr.poutchinystudio.whirling_back.util.Recipe;
 import fr.poutchinystudio.whirling_back.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -203,10 +204,12 @@ public class GameService {
         int witchIndex = Integer.parseInt(characterIndex);
         if (witchIndex != 0 && witchIndex != 1 && witchIndex != 2) witchIndex = 0;
         game.getPlayingAreas().get(userIndex).setupWitch(witchIndex);
+        game.getPlayingAreas().get(userIndex).setupIngredients();
 
         // Next phase
         if (!game.getAreReady().contains(false)) {
             game.cleanAreReady();
+            game.refillHands();
             game.goToRecipePhase();
         }
 
@@ -214,17 +217,25 @@ public class GameService {
         pushWsNotification(game);
     }
 
-    public void readyRecipe(String recipeIndex) {
+    public void readyRecipe(Recipe givenRecipe) {
         User user = userService.findById(Utils.jwtUserId());
         Optional<Game> oGame = repository.findById(user.getGame());
         if (oGame.isEmpty()) return;
         Game game = oGame.get();
         if (!game.getCurrentPhase().equals(Phases.PLAY_RECIPES)) return;
 
-        // Ready
+        // Ready - prepare
         int userIndex = game.getPlayersId().indexOf(user.getId());
         if (game.getAreReady().get(userIndex)) return;
+
+        // Check if recipe is in hand
+        if (!game.getPlayingAreas().get(userIndex).isRecipeInHand(givenRecipe)) return;
+
+        // Ready - done
         game.setReadyFor(userIndex);
+
+        // Add recipe to skills and remove from hand
+        game.getPlayingAreas().get(userIndex).chooseRecipe(givenRecipe);
 
         // Next phase
         if (!game.getAreReady().contains(false)) {
