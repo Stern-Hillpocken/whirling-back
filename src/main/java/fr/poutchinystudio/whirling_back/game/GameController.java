@@ -1,6 +1,7 @@
 package fr.poutchinystudio.whirling_back.game;
 
 import fr.poutchinystudio.whirling_back.dto.OneValueObject;
+import fr.poutchinystudio.whirling_back.util.Recipe;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,9 +69,9 @@ public class GameController {
 
     @PostMapping("/ready/recipe")
     public void readyRecipe(
-            @RequestBody OneValueObject ovo
+            @RequestBody Recipe recipe
     ) {
-        this.service.readyRecipe(ovo.value);
+        this.service.readyRecipe(recipe);
     }
 
     @PostMapping("/ready/produce")
