@@ -32,4 +32,24 @@ public class Recipe {
         this.direction = direction;
         this.output = output;
     }
+
+    public void fixDirection() {
+        direction = Directions.ONE;
+    }
+
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        for (Arcanas a : arcana) {
+            str.append(a).append(" ");
+        }
+        str.append("/ ");
+        for (Ingredients i : input) {
+            str.append(i).append(" ");
+        }
+        str.append(">>> ");
+        for (Ingredients o : output) {
+            str.append(o).append(" ");
+        }
+        return str.toString();
+    }
 }

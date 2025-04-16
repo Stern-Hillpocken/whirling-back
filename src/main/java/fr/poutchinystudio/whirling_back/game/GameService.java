@@ -125,7 +125,6 @@ public class GameService {
         if (!game.getOwnerId().equals(user.getId())) return;
         if (game.isStarted()) return;
 
-        int endPosition = 0;
         if (startPosition == 0 && clockWay.equals("clockwise")) {
             String name = game.getPlayersId().remove(1);
             game.getPlayersId().add(game.getPlayersId().size()-1, name);
@@ -224,14 +223,14 @@ public class GameService {
         Game game = oGame.get();
         if (!game.getCurrentPhase().equals(Phases.PLAY_RECIPES)) return;
 
-        // Ready - prepare
+        // User index
         int userIndex = game.getPlayersId().indexOf(user.getId());
         if (game.getAreReady().get(userIndex)) return;
 
         // Check if recipe is in hand
         if (!game.getPlayingAreas().get(userIndex).isRecipeInHand(givenRecipe)) return;
 
-        // Ready - done
+        // Ready
         game.setReadyFor(userIndex);
 
         // Add recipe to skills and remove from hand
@@ -247,20 +246,28 @@ public class GameService {
         pushWsNotification(game);
     }
 
-    public void readyProduce() {
+    public void readyProduce(List<Recipe> triggeredSkills) {
         User user = userService.findById(Utils.jwtUserId());
         Optional<Game> oGame = repository.findById(user.getGame());
         if (oGame.isEmpty()) return;
         Game game = oGame.get();
         if (!game.getCurrentPhase().equals(Phases.PRODUCE_INGREDIENTS)) return;
 
-        // Ready
+        // User index
         int userIndex = game.getPlayersId().indexOf(user.getId());
         if (game.getAreReady().get(userIndex)) return;
+
+        // Check if skills are doable
+        if (game.getPlayingAreas().get(userIndex).realInputOutput().get(0) == null) return;
+        game.getPlayingAreas().get(userIndex).setSkillsPrepared(triggeredSkills);
+
+        // Ready
         game.setReadyFor(userIndex);
 
         // Next phase
         if (!game.getAreReady().contains(false)) {
+            // Apply changes
+            game.applySkillsPrepared();
             game.cleanAreReady();
             game.goToRecipePhase();
         }

@@ -75,7 +75,9 @@ public class GameController {
     }
 
     @PostMapping("/ready/produce")
-    public void readyProduce() {
-        this.service.readyProduce();
+    public void readyProduce(
+            @RequestBody List<Recipe> triggeredSkills
+    ) {
+        this.service.readyProduce(triggeredSkills);
     }
 }
