@@ -1,5 +1,6 @@
 package fr.poutchinystudio.whirling_back.game;
 
+import fr.poutchinystudio.whirling_back.enums.Ingredients;
 import fr.poutchinystudio.whirling_back.enums.Phases;
 import fr.poutchinystudio.whirling_back.user.User;
 import fr.poutchinystudio.whirling_back.user.UserRepository;
@@ -116,4 +117,22 @@ public class Game {
         }
     }
 
+    public void applySkillsPrepared() {
+        for (int index = 0; index < playingAreas.size(); index++) {
+            // Generate real input and output
+            List<List<Ingredients>> realInputOutput = playingAreas.get(index).realInputOutput();
+            List<Ingredients> realInput = realInputOutput.get(0);
+            List<Ingredients> realOutput = realInputOutput.get(1);
+            int indexRightPlayer = index+1;
+            if (index+1 == playingAreas.size()) indexRightPlayer = 0;
+            // Remove input
+            for (Ingredients i : realInput) playingAreas.get(index).getWorkbench().remove(i);
+            // Add output
+            for (Ingredients i : realOutput) playingAreas.get(indexRightPlayer).getWorkbench().add(i);
+        }
+        // Add to circle
+        for (int i = 0; i < playingAreas.size(); i++) {
+            //
+        }
+    }
 }
