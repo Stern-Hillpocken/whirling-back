@@ -129,6 +129,8 @@ public class Game {
             for (Ingredients i : realInput) playingAreas.get(index).getWorkbench().remove(i);
             // Add output
             for (Ingredients i : realOutput) playingAreas.get(indexRightPlayer).getWorkbench().add(i);
+            // Remove skills prepared
+            playingAreas.get(index).setSkillsPrepared(new ArrayList<>());
         }
         // Add to circle
         for (int i = 0; i < playingAreas.size(); i++) {
